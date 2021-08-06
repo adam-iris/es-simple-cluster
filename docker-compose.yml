@@ -108,7 +108,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
-      - ./default.env
+      - ./docker.env
     ports:
       - 8432:5432
 
@@ -142,21 +142,6 @@ services:
   # Example data service containers
   ####
 
-  django-pre:
-    # GitHub repository image
-    image: ghcr.io/earthscope/es-example-django:main
-    # Or link/submodule to a subdirectory
-    # build: ../es-example-django
-    entrypoint: /docker-pre.sh
-    depends_on:
-      - postgres
-    volumes:
-      - ./avro_schemas:/avro_schemas:ro
-      - web-static:/web-static
-      - ../es-example-django:/es-example-django
-    env_file:
-      - ./default.env
-
   # Example web interfaces (collection and distribution)
   django-web:
     # GitHub repository image
@@ -164,8 +149,6 @@ services:
     # Or link/submodule to a subdirectory
     # build: ../es-example-django
     command: gunicorn -c ./gunicorn.conf.py
-    depends_on:
-      - django-pre
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
@@ -174,7 +157,7 @@ services:
       # For local development, can link to sources
       - ../es-example-django:/es-example-django
     env_file:
-      - ./default.env
+      - ./docker.env
     environment:
       - DJANGO_PROMETHEUS=1
     ports:
@@ -191,14 +174,13 @@ services:
     depends_on:
       - broker
       - schema-registry
-      - django-pre
     volumes:
       # AVRO schemas
       - ./avro_schemas:/avro_schemas:ro
       # For local development, can link to sources
       - ../es-example-django:/es-example-django
     env_file:
-      - ./default.env
+      - ./docker.env
 
     
 # Volumes are local by default, but could be backed by test/prod datasources
